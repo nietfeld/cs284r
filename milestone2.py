@@ -319,34 +319,6 @@ remove_border(left=False, bottom=False)
 
 
 
-#calculate centrality 
-closeness_dict = nx.closeness_centrality(votes, distance="difference")
-sorted_closenesses = sorted(closeness_dict.iteritems(), key=operator.itemgetter(1))
-sorted_keys = [x[0] for x in sorted_closenesses]
-sorted_values = [x[1] for x in sorted_closenesses]
-color = [mst.node[senator]['color'] for senator in bipartisan_votes.nodes()]
-
-
-#visualize centrality
-fig = plt.figure(num=None, figsize=(18, 6), dpi=80, facecolor='w', edgecolor='k')
-ax2 = fig.add_subplot(111)
-
-plt.bar(range(len(sorted_keys)), sorted_values, align='center', color=color)
-plt.xticks(range(len(sorted_keys)), sorted_keys, rotation=80, fontsize='small')
-plt.show()
-"""
-print "Lowest closeness_centrality scores:" 
-for senator in sorted_closenesses[0:5]: 
-    print "%s : %s" % (senator[0], senator[1]) 
-
-print
-    
-#TO DO REVERSE 
-print "Highest closeness_centrality scores:"
-for senator in sorted_closenesses[-5:]: 
-    print "%s : %s" % (senator[0], senator[1])
-"""
-
 # <markdowncell>
 
 # ### Problem 6
@@ -392,6 +364,36 @@ def bipartisan_graph(data):
 
 all_bipartisan_votes = bipartisan_graph(vote_data) 
 bipartisan_votes = nx.minimum_spanning_tree(all_bipartisan_votes, weight='distance')
+
+
+# Centrality stuff just moved here
+#calculate centrality 
+closeness_dict = nx.closeness_centrality(votes, distance="difference")
+sorted_closenesses = sorted(closeness_dict.iteritems(), key=operator.itemgetter(1))
+sorted_keys = [x[0] for x in sorted_closenesses]
+sorted_values = [x[1] for x in sorted_closenesses]
+color = [mst.node[senator]['color'] for senator in bipartisan_votes.nodes()]
+
+
+#visualize centrality
+fig = plt.figure(num=None, figsize=(18, 6), dpi=80, facecolor='w', edgecolor='k')
+ax2 = fig.add_subplot(111)
+
+plt.bar(range(len(sorted_keys)), sorted_values, align='center', color=color)
+plt.xticks(range(len(sorted_keys)), sorted_keys, rotation=80, fontsize='small')
+plt.show()
+"""
+print "Lowest closeness_centrality scores:" 
+for senator in sorted_closenesses[0:5]: 
+    print "%s : %s" % (senator[0], senator[1]) 
+
+print
+    
+#TO DO REVERSE 
+print "Highest closeness_centrality scores:"
+for senator in sorted_closenesses[-5:]: 
+    print "%s : %s" % (senator[0], senator[1])
+"""
  
 
 #this makes sure draw_spring results are the same at each call
@@ -525,6 +527,11 @@ bill_list = get_all_bills()
 location_csv = 'state_locations.csv'
 states = {}
 
+# Create a map of the United States
+m = Basemap(llcrnrlon=-119, llcrnrlat=22, urcrnrlon=-64,
+                               urcrnrlat=49, projection='lcc', lat_1=33, lat_2=45,
+                               lon_0=-95, resolution='i', area_thresh=10000)
+
 with open(location_csv, 'rb') as csvfile:
     reader = csv.DictReader(csvfile, delimiter=',')
     # go through the csv file line by line
@@ -594,11 +601,6 @@ nx.draw_networkx_nodes(bills, rep_locations, node_color=color, node_size=150)
 plt.xticks([])
 plt.yticks([])
 remove_border(left=False, bottom=False)
-
-# Create a map of the United States
-m = Basemap(llcrnrlon=-119, llcrnrlat=22, urcrnrlon=-64,
-                               urcrnrlat=49, projection='lcc', lat_1=33, lat_2=45,
-                               lon_0=-95, resolution='i', area_thresh=10000)
 
 # Plot the map
 m.drawcoastlines()
