@@ -3,7 +3,6 @@
 # *Kendall and Emi Nietfeld*
 # 
 
-%matplotlib inline
 
 
 import numpy as np
@@ -14,6 +13,14 @@ import matplotlib.pyplot as plt
 import operator
 import itertools
 import json
+from mpl_toolkits.basemap import Basemap
+import csv
+import random
+import scipy
+import math
+from IPython.display import Image
+
+
 
 #configs
 # set some nicer defaults for matplotlib
@@ -100,9 +107,7 @@ Examples
  u'title': u'A bill to ensure the complete and timely payment of the obligations of the United States Government until May 19, 2013, and for other purposes.',
  u'type': u'hr'}
 """
-import json
 vote_url = "https://www.govtrack.us/data/congress/113/votes/2013"
-import pattern.web as web
 
 #gets a specific votes
 def get_vote(number): 
@@ -515,54 +520,19 @@ def get_all_bills():
 
 bill_list = get_all_bills()
 
-# <markdowncell>
-
-# ### Problem 8
-# 
-# Write a function to builded a Directed Graph (DiGraph) from these data, according to the following spec:
-
-# <codecell>
-
+# LATITUDE AND LONGITUDE
 # This scans in the correct latitude and longitude for each state
-
-import csv
-
 location_csv = 'state_locations.csv'
 states = {}
 
 with open(location_csv, 'rb') as csvfile:
     reader = csv.DictReader(csvfile, delimiter=',')
-	# go through the csv file line by line
+    # go through the csv file line by line
     for row in reader:
         states[row['name']] = m(row['long'],row['lat'])
 
 
-# <codecell>
-
-# This makes a map of the United States
-import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap as Basemap
-
-m = Basemap(llcrnrlon=-119, llcrnrlat=22, urcrnrlon=-64,
-                               urcrnrlat=49, projection='lcc', lat_1=33, lat_2=45,
-                               lon_0=-95, resolution='i', area_thresh=10000)
-
-m.drawcoastlines()
-m.drawcountries()
-m.drawstates()
-m.bluemarble()
-
-cmap = plt.cm.hot
-ax = plt.gca()
-plt.show()
-
-# <codecell>
-
 """
-Function
---------
-bill_graph
-
 Turn the bill graph data into a NetworkX Digraph
 
 Parameters
@@ -578,11 +548,13 @@ graph : A NetworkX DiGraph, with the following properties
     * Each edge from A to B is assigned a weight equal to how many 
       bills are sponsored by B and co-sponsored by A
 """
+# Save the state coordinates and correct color for each representative
 rep_locations = {}
 rep_colors = {}
 
 def add_sponsors(g, bill):
     sponsor = bill['sponsor']['name']
+    # Save each representative's locations
     rep_locations[sponsor] = states[bill['sponsor']['state']]
 
     cosponsors = [x['name'] for x in bill['cosponsors']]
@@ -606,7 +578,7 @@ def bill_graph(data):
     
     return graph
 
-# <codecell>
+
 
 bills = bill_graph(bill_list)
 
@@ -618,15 +590,17 @@ nx.draw_networkx_edges(bills, rep_locations, alpha = .03)
 #plot the nodes
 nx.draw_networkx_nodes(bills, rep_locations, node_color=color, node_size=150)
 
-#draw the labels
-# lbls = nx.draw_networkx_labels(bills, rep_locations, alpha=5, font_size=8)
-
 #coordinate information is meaningless here, so let's remove it
 plt.xticks([])
 plt.yticks([])
 remove_border(left=False, bottom=False)
 
+# Create a map of the United States
+m = Basemap(llcrnrlon=-119, llcrnrlat=22, urcrnrlon=-64,
+                               urcrnrlat=49, projection='lcc', lat_1=33, lat_2=45,
+                               lon_0=-95, resolution='i', area_thresh=10000)
 
+# Plot the map
 m.drawcoastlines()
 m.drawcountries()
 m.drawstates()
@@ -636,10 +610,7 @@ cmap = plt.cm.hot
 ax = plt.gca()
 plt.show()
 
-# <codecell>
-
-import math
-
+# Got this from online to calculate distance between two coordinate points
 def distance_calc(lat1, long1, lat2, long2):
 
     # Convert latitude and longitude to 
@@ -664,9 +635,6 @@ def distance_calc(lat1, long1, lat2, long2):
 # <codecell>
 
 # This block of code searches the graph for weights and distances
-
-import random
-import scipy
 
 G = bills
 distance = []
@@ -706,10 +674,6 @@ print results.summary()
 slope, intercept, r_value, p_value, std_err = stats.linregress(weight,distance)
 print "Slope: %s \nIntercept: %s \nR-Val: %s \nP-val %s\nStd Err: %s" % (slope, intercept, r_value, p_value, std_err)
             
-            
-
-# <markdowncell>
-
 # ### Problem 9
 # 
 # Using `nx.pagerank_numpy`, compute the PageRank score for each senator in this graph. Visualize the results. Determine the 5 Senators with the highest
@@ -807,7 +771,7 @@ nx.write_gexf(votes, 'votes.gexf')
 
 # <codecell>
 
-from IPython.display import Image
+
 
 path = 'gephishot.png'
 Image(path)
