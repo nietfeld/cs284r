@@ -521,6 +521,8 @@ def get_all_bills():
 # <codecell>
 
 bill_list = get_all_bills()
+with open('bills_2013.txt', 'w') as outfile:
+  json.dump(all_votes, outfile)
 
 # LATITUDE AND LONGITUDE
 # This scans in the correct latitude and longitude for each state
