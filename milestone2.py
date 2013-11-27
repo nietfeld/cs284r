@@ -161,6 +161,7 @@ with open('votes_1990_2013.txt', 'w') as outfile:
 
 # Loading info from files 
 
+"""
 # FIX THIS TO DOWNLOAD FROM THE RIGHT FILE
 json_data=open('house_data.txt')
 house_vote_data = json.load(json_data)
@@ -169,7 +170,7 @@ json_data.close()
 json_data=open('senate_data.txt')
 vote_data = json.load(json_data)
 json_data.close()
-
+"""
 # ### Problem 2
 # 
 # Now, turn these data into a NetworkX graph, according to the spec below. For details on using NetworkX, consult the lab materials for November 1, as well as the [NetworkX documentation](http://networkx.github.io/).
