@@ -71,41 +71,11 @@ def remove_border(axes=None, top=False, right=False, left=True, bottom=True):
     if right:
         ax.yaxis.tick_right()
 
-
-# The website [govtrack.us](http://www.govetrack.us) collects data on activities in the Senate and House of Representatives. It's a great source of information for making data-driven assessments about Congress.
-
-# ### Problem 1.
-# 
-# The directories at http://www.govtrack.us/data/congress/113/votes/2013 contain JSON information about every vote cast for the current (113th)  Congress. Subdirectories beginning with "S" correspond to Senate votes, while subdirectories beginning with "H" correspond to House votes.
-# 
-# Write two functions: one that downloads and parses a single Senate vote page given the vote number, and another that repeatedly calls this function to build a full collection of Senate votes from the 113th Congress.
-
-# <codecell>
-
 """
-Function
---------
 get_senate_vote
 
 Scrapes a single JSON page for a particular Senate vote, given by the vote number
 
-Parameters
-----------
-vote : int
-   The vote number to fetch
-   
-Returns
--------
-vote : dict
-   The JSON-decoded dictionary for that vote
-   
-Examples
---------
->>> get_senate_vote(11)['bill']
-{u'congress': 113,
- u'number': 325,
- u'title': u'A bill to ensure the complete and timely payment of the obligations of the United States Government until May 19, 2013, and for other purposes.',
- u'type': u'hr'}
 """
 vote_url = "https://www.govtrack.us/data/congress/113/votes/2013"
 
@@ -161,6 +131,7 @@ with open('votes_1990_2013.txt', 'w') as outfile:
 
 # Loading info from files 
 
+"""
 # FIX THIS TO DOWNLOAD FROM THE RIGHT FILE
 json_data=open('house_data.txt')
 house_vote_data = json.load(json_data)
@@ -169,13 +140,11 @@ json_data.close()
 json_data=open('senate_data.txt')
 vote_data = json.load(json_data)
 json_data.close()
-
-# ### Problem 2
-# 
-# Now, turn these data into a NetworkX graph, according to the spec below. For details on using NetworkX, consult the lab materials for November 1, as well as the [NetworkX documentation](http://networkx.github.io/).
+"""
 
 # put into network
 
+# make an empty "senator_colors array to save all colors"
 senator_colors = {}
 
 def add_edges(g, senators): 
@@ -242,19 +211,9 @@ plt.xticks([])
 plt.yticks([])
 remove_border(left=False, bottom=False)
 
-# <markdowncell>
-
-# The spring layout tries to group nodes with large edge-weights near to each other. In this context, that means it tries to organize the Senate into similarly-voting cliques. However, there's simply too much going on in this plot -- we should simplify the representation.
-
-# <markdowncell>
-
-# ### Problem 3
-# 
-# Compute the `Minimum Spanning Tree` of this graph, using the `difference` edge attribute as the weight to minimize. A [Minimum Spanning Tree](http://en.wikipedia.org/wiki/Minimum_spanning_tree) is the subset of edges which trace at least one path through all nodes ("spanning"), with minimum total edge weight. You can think of it as a simplification of a network.
-# 
-# Plot this new network, making modifications as necessary to prevent the graph from becoming too busy.
-
-# <codecell>
+"""
+Minimum-Spanning Tree Analysis
+"""
 
 mst = nx.minimum_spanning_tree(votes, weight='distance')
 
@@ -281,53 +240,7 @@ plt.xticks([])
 plt.yticks([])
 remove_border(left=False, bottom=False)
 
-# <markdowncell>
 
-# ### Problem 4
-# 
-# While this graph has less information, the remaining information is easier to digest. What does the Minimum Spanning Tree mean in this context? How does this graph relate to partisanship in the Senate? Which nodes in this graph are the most and least bi-partisan?
-
-# <markdowncell>
-
-# The minimum spanning tree is the closest connections between all senators. We built up the tree by selecting the edge with the most votes in common and a senator not yet in the graph until every senator was included.
-# 
-# The nodes with the most connections are the most bipartison while the nodes at the bottom of the tree (only one connection). In the center, we have Alexander who is "The most bipartisan" according to this measure. On the outskirts we have the beleagured senators of NJ and MA who didn't stick around for very long. This graph really isn't fair to them, just because they weren't around long. Sucks to be them. 
-# 
-# Since the tree is not very deep, we don't really have too much information about the most and the least bipartisan. It looks like democrats have smaller difference scores than republicans (which you expect from the majority party). There are no really obvious partisans. 
-
-# <markdowncell>
-
-# ### Problem 5
-# 
-# (For this problem, use the full graph for centrality computation, and not the Minimum Spanning Tree)
-# 
-# Networkx can easily compute [centrality](https://en.wikipedia.org/wiki/Centrality) measurements. 
-# 
-# Briefly discuss what ``closeness_centrality`` means, both mathematically and in the context of the present graph -- how does the centrality relate to partisanship? Choose a way to visualize the `closeness_centrality` score for each member of the Senate, using edge `difference` as the distance measurement. Determine the 5 Senators with the highest and lowest centralities. 
-# 
-# Comment on your results. In particular, note the outliers John Kerry (who recently resigned his Senate seat when he became Secretary of State), Mo Cowan (Kerry's interim replacement) and Ed Markey (Kerry's permanent replacement) have low centrality scores -- why?
-
-# <markdowncell>
-
-# Mathematically, closeless centrality is the inverse of the sum of the distances to other nodes. The more central a node is the lower its total distance to all other nodes. If we were going to measure how long it would take to spread information from one node to all the others sequentially, closeness centrality would measure that. 
-# 
-# With regards to this graph, closeness centrality relates to partisanship, since a high score means a candidate is close to every other politician in the graph, in both parties. 
-# 
-# We notice that the people with the lowest closeness score only served part of their term in the senate. With fewer votes cast, they had many fewer oportunities to vote "Yea" or "Nay" with others on bills. Since this in not accounted for, it looks as though these politicians are incredibly partisan, when in fact they are just new. 
-
-# <codecell>
-
-
-
-# <markdowncell>
-
-# ### Problem 6
-# 
-# Centrality isn't a perfect proxy for bipartisanship, since it gauges how centralized a node is to the network as a whole, and not how similar a Democrat node is to the Republican sub-network (and vice versa).
-# 
-# Can you come up with another measure that better captures bipartisanship than closeness centrality? Develop your own metric -- how does it differ from the closeness centrality? Use visualizations to support your points.
-
-# <codecell>
 
 def add_bipartisan_edges(g, senators): 
     
@@ -439,18 +352,6 @@ with open(location_csv, 'rb') as csvfile:
 """
 Turn the bill graph data into a NetworkX Digraph
 
-Parameters
-----------
-data : list of dicts
-    The data returned from get_all_bills
-
-Returns
--------
-graph : A NetworkX DiGraph, with the following properties
-    * Each node is a senator. For a label, use the 'name' field 
-      from the 'sponsor' and 'cosponsors' dict items
-    * Each edge from A to B is assigned a weight equal to how many 
-      bills are sponsored by B and co-sponsored by A
 """
 # Save the state coordinates and correct color for each representative
 rep_locations = {}
@@ -485,8 +386,6 @@ def bill_graph(data):
 
 
 bills = bill_graph(bill_list)
-
-# <codecell>
 
 #plot the edges
 nx.draw_networkx_edges(bills, rep_locations, alpha = .03)
@@ -531,7 +430,6 @@ def distance_calc(lat1, long1, lat2, long2):
     # in your favorite set of units to get length.
     return arc
 
-# <codecell>
 
 # This block of code searches the graph for weights and distances
 
@@ -573,14 +471,10 @@ print results.summary()
 slope, intercept, r_value, p_value, std_err = stats.linregress(weight,distance)
 print "Slope: %s \nIntercept: %s \nR-Val: %s \nP-val %s\nStd Err: %s" % (slope, intercept, r_value, p_value, std_err)
             
-# ### Problem 9
-# 
-# Using `nx.pagerank_numpy`, compute the PageRank score for each senator in this graph. Visualize the results. Determine the 5 Senators with the highest
-# PageRank scores. How effective is this approach at identifying leaders? How does the PageRank rating compare to the degree of each node?
-# 
-# Note: you can read about individual Senators by searching for them on the [govtrack website](https://www.govtrack.us/).
 
-# <codecell>
+"""
+PageRank
+"""
 
 pagerank_scores = nx.pagerank_numpy(bills)
 #print top and bottom 5
@@ -597,7 +491,6 @@ for senator in sorted_pagerank[-5:]:
     print "%s: pagerank: %s, indegree: %s, outdegree: %s" % (senator[0], senator[1], (bills.in_degree([senator[0]])).values()[0], (bills.out_degree([senator[0]])).values()[0])
 """
 
-# <codecell>
 
 #bills.tounderected
 #make mst 
@@ -640,67 +533,12 @@ plt.xlabel("Senators organized by Pagerank Score")
 plt.ylabel('Out-degree')
 plt.show()
 
-# <markdowncell>
-
-# As we see comparing the pagerank graph to the identically ordered in and out degree graphs, the pagerank is a pretty good prediction of who is a good leader. We see in the second graph some senators that really deviate from the trend, but overall they both slope upwards.
-# 
-# We also see that the pagerank is pretty much unrelated to the outdegree, which is what we expect. Signing onto other people's bills doesn't really make you a leader. 
-
-# <markdowncell>
-
-# ### Interactive Visualization
-# 
-# Producing a good node link layout is not quite so simple. Nevertheless, we will give it a try. 
-# 
-# We will use [Gephi](https://gephi.org/) for interactive graph visualization. Gephi supports a wide variety of graph file formats, and NetworkX exports to several of them. We'll use the Graph Exchange XML Format (GEXF).
-
-# <codecell>
-
 nx.write_gexf(votes, 'votes.gexf')
 
-# <markdowncell>
-
-# ### Problem 10: Analysis with Gephi
-# 
-# Download and install [Gephi](https://gephi.org/). See the [lab](http://goo.gl/SzHioP) for a brief introduction. Load the exported votes file. Try to produce a layout that clearly separates Democrats from Republicans (hint: filter on edge weight and re-layout once you filtered). Run PageRank and some other statistics and try encoding them with node color and node size. Run the "Modularity" statistic and encode the results in color.
-# 
-# Include a screenshot of your "best" visualization and embed the image here with `IPython.display.Image`. Make sure to include this image in your submission.
-# 
-# Explain your observations. Is the network visualization very helpful? Try to visualize your LinkedIn network (see the lab) or the one provided in the lab. Which dataset is more suitable for visualization and why is there a difference?
-
-# <codecell>
 
 
 
 path = 'gephishot.png'
 Image(path)
 
-
-# <markdowncell>
-
-# First of all, working with the Gephi GUI reminded me of why CS179 exists... I think if Photoshop were open source, magazines would still show models with body fat... 
-# 
-# Now onto the network! I think this analysis is helpful- essentially we want to see who is "closest to the center" and this makes this loud and clear. We see Collins in the center, right where we expect him! In a sense, this graph is useful since it mirrors the layout we imagine on a senate floor. No one is disconnected from everyone else, but is one tangled, disfunctional glob. 
-# 
-# I wish I'd been able to get the results of PageRank to show up on my nodes, but unfortunately it wasn't working for me (also Preview wasn't working, so the image is a bit rough.)
-
-# <markdowncell>
-
-# ### How to Submit
-# 
-# To submit your homework, create a folder named lastname_firstinitial_hw5 and place this notebook file in the folder. Double check that this file is still called HW5.ipynb, and that it contains your solutions. Also include any Gephi screenshots. Compress the folder (please use .zip compression) and submit to the CS109 dropbox in the appropriate folder. If we cannot access your work because these directions are not followed correctly, we will not grade your work.
-
-# <markdowncell>
-
-# ---
-# *css tweaks in this cell*
-# <style>
-# div.text_cell_render {
-#     line-height: 150%;
-#     font-size: 110%;
-#     width: 800px;
-#     margin-left:50px;
-#     margin-right:auto;
-#     }
-# </style>
 
