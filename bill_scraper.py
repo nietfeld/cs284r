@@ -35,13 +35,15 @@ def get_year_bills(chamber, session):
 
 def get_all_bills(chamber) : 
     all_bills_dict = {}
-    for session in range(99, 114): 
+    for session in range(111, 113): 
+        print "session: %s" % session
         all_bills_dict[session] = get_year_bills(chamber, session)
     return all_bills_dict
 
-all_bills = get_all_bills("house")
-with open('house_bills_1990_2013.txt', 'w') as outfile:
-  json.dump(all_bills, outfile)
+
+all_bills = get_all_bills("senate")
+with open('senate_bills_111_112.txt', 'w') as outfile:
+    json.dump(all_bills, outfile)
 
 """
 with open('senate_bills_1990_2013.txt', 'w') as outfile:
