@@ -82,144 +82,10 @@ json_data.close()
 
 senator_colors = {}
 
-def add_edges(g, senators): 
-    
-    for senator in senators: 
-        
-        if senator["party"] == "D": 
-            color = "b"
-        elif senator["party"] == "R" : 
-            color = "r"
-        else : 
-            color = "k"
-        senator_colors[senator["last_name"] + ", " + senator["first_name"]] = color
-        g.add_node(senator["display_name"], color=color)
-        
-    # create a list of all the pairs of senators
-    senator_pairs = list(itertools.combinations([x["display_name"] for x in senators], r=2))
-    for sen1, sen2 in senator_pairs: 
-        #increment or add an edge
-        if g.has_edge(sen1, sen2): 
-            g[sen1][sen2]['weight'] = (g[sen1][sen2]['weight'] + 1)
-            g.edge[sen1][sen2]['difference'] = (1./g.edge[sen1][sen2]['weight'])
-        else:
-            g.add_edge(sen1, sen2, weight=1)
-    return g
-    
-        
-def vote_graph(data): 
-    graph = nx.Graph()
-    
-    for vote in data: 
-        graph = add_edges(graph, vote["votes"]["Yea"])
-        graph = add_edges(graph, vote["votes"]["Nay"])
-    
-    return graph
-
-        
-
-# <codecell>
-
-votes = vote_graph(vote_data)    
-
-#VISUALIZING
-
-#this makes sure draw_spring results are the same at each call
-np.random.seed(1)  
-
-color = [votes.node[senator]['color'] for senator in votes.nodes()]
-
-#determine position of each node using a spring layout
-pos = nx.spring_layout(votes, iterations=200)
-
-#plot the edges
-nx.draw_networkx_edges(votes, pos, alpha = .05)
-
-#plot the nodes
-nx.draw_networkx_nodes(votes, pos, node_color=color)
-
-#draw the labels
-lbls = nx.draw_networkx_labels(votes, pos, alpha=5, font_size=8)
-
-#coordinate information is meaningless here, so let's remove it
-plt.xticks([])
-plt.yticks([])
-remove_border(left=False, bottom=False)
-
-# <markdowncell>
-
-# The spring layout tries to group nodes with large edge-weights near to each other. In this context, that means it tries to organize the Senate into similarly-voting cliques. However, there's simply too much going on in this plot -- we should simplify the representation.
-
-# <markdowncell>
-
-# ### Problem 3
-# 
-# Compute the `Minimum Spanning Tree` of this graph, using the `difference` edge attribute as the weight to minimize. A [Minimum Spanning Tree](http://en.wikipedia.org/wiki/Minimum_spanning_tree) is the subset of edges which trace at least one path through all nodes ("spanning"), with minimum total edge weight. You can think of it as a simplification of a network.
-# 
-# Plot this new network, making modifications as necessary to prevent the graph from becoming too busy.
-
-# <codecell>
-
-mst = nx.minimum_spanning_tree(votes, weight='distance')
 
 
-#this makes sure draw_spring results are the same at each call
-np.random.seed(1)  
 
-color = [mst.node[senator]['color'] for senator in mst.nodes()]
 
-#determine position of each node using a spring layout
-pos = nx.spring_layout(mst, iterations=2000, k=.50)
-
-#plot the edges
-nx.draw_networkx_edges(mst, pos, alpha = .05)
-
-#plot the nodes
-nx.draw_networkx_nodes(mst, pos, node_color=color)
-
-#draw the labels
-lbls = nx.draw_networkx_labels(mst, pos, alpha=5, font_size=8)
-
-#coordinate information is meaningless here, so let's remove it
-plt.xticks([])
-plt.yticks([])
-remove_border(left=False, bottom=False)
-
-# <markdowncell>
-
-# ### Problem 4
-# 
-# While this graph has less information, the remaining information is easier to digest. What does the Minimum Spanning Tree mean in this context? How does this graph relate to partisanship in the Senate? Which nodes in this graph are the most and least bi-partisan?
-
-# <markdowncell>
-
-# The minimum spanning tree is the closest connections between all senators. We built up the tree by selecting the edge with the most votes in common and a senator not yet in the graph until every senator was included.
-# 
-# The nodes with the most connections are the most bipartison while the nodes at the bottom of the tree (only one connection). In the center, we have Alexander who is "The most bipartisan" according to this measure. On the outskirts we have the beleagured senators of NJ and MA who didn't stick around for very long. This graph really isn't fair to them, just because they weren't around long. Sucks to be them. 
-# 
-# Since the tree is not very deep, we don't really have too much information about the most and the least bipartisan. It looks like democrats have smaller difference scores than republicans (which you expect from the majority party). There are no really obvious partisans. 
-
-# <markdowncell>
-
-# ### Problem 5
-# 
-# (For this problem, use the full graph for centrality computation, and not the Minimum Spanning Tree)
-# 
-# Networkx can easily compute [centrality](https://en.wikipedia.org/wiki/Centrality) measurements. 
-# 
-# Briefly discuss what ``closeness_centrality`` means, both mathematically and in the context of the present graph -- how does the centrality relate to partisanship? Choose a way to visualize the `closeness_centrality` score for each member of the Senate, using edge `difference` as the distance measurement. Determine the 5 Senators with the highest and lowest centralities. 
-# 
-# Comment on your results. In particular, note the outliers John Kerry (who recently resigned his Senate seat when he became Secretary of State), Mo Cowan (Kerry's interim replacement) and Ed Markey (Kerry's permanent replacement) have low centrality scores -- why?
-
-# <markdowncell>
-
-# Mathematically, closeless centrality is the inverse of the sum of the distances to other nodes. The more central a node is the lower its total distance to all other nodes. If we were going to measure how long it would take to spread information from one node to all the others sequentially, closeness centrality would measure that. 
-# 
-# With regards to this graph, closeness centrality relates to partisanship, since a high score means a candidate is close to every other politician in the graph, in both parties. 
-# 
-# We notice that the people with the lowest closeness score only served part of their term in the senate. With fewer votes cast, they had many fewer oportunities to vote "Yea" or "Nay" with others on bills. Since this in not accounted for, it looks as though these politicians are incredibly partisan, when in fact they are just new. 
-
-# <codecell>
 
 
 
@@ -270,35 +136,7 @@ all_bipartisan_votes = bipartisan_graph(vote_data)
 bipartisan_votes = nx.minimum_spanning_tree(all_bipartisan_votes, weight='distance')
 
 
-# Centrality stuff just moved here
-#calculate centrality 
-closeness_dict = nx.closeness_centrality(votes, distance="difference")
-sorted_closenesses = sorted(closeness_dict.iteritems(), key=operator.itemgetter(1))
-sorted_keys = [x[0] for x in sorted_closenesses]
-sorted_values = [x[1] for x in sorted_closenesses]
-color = [mst.node[senator]['color'] for senator in bipartisan_votes.nodes()]
 
-
-#visualize centrality
-fig = plt.figure(num=None, figsize=(18, 6), dpi=80, facecolor='w', edgecolor='k')
-ax2 = fig.add_subplot(111)
-
-plt.bar(range(len(sorted_keys)), sorted_values, align='center', color=color)
-plt.xticks(range(len(sorted_keys)), sorted_keys, rotation=80, fontsize='small')
-plt.show()
-"""
-print "Lowest closeness_centrality scores:" 
-for senator in sorted_closenesses[0:5]: 
-    print "%s : %s" % (senator[0], senator[1]) 
-
-print
-    
-#TO DO REVERSE 
-print "Highest closeness_centrality scores:"
-for senator in sorted_closenesses[-5:]: 
-    print "%s : %s" % (senator[0], senator[1])
-"""
- 
 
 #this makes sure draw_spring results are the same at each call
 np.random.seed(1)  
@@ -339,24 +177,6 @@ with open(location_csv, 'rb') as csvfile:
     for row in reader:
         states
         [row['name']] = m(row['long'],row['lat'])
-
-
-"""
-Turn the bill graph data into a NetworkX Digraph
-
-Parameters
-----------
-data : list of dicts
-    The data returned from get_all_bills
-
-Returns
--------
-graph : A NetworkX DiGraph, with the following properties
-    * Each node is a senator. For a label, use the 'name' field 
-      from the 'sponsor' and 'cosponsors' dict items
-    * Each edge from A to B is assigned a weight equal to how many 
-      bills are sponsored by B and co-sponsored by A
-"""
 # Save the state coordinates and correct color for each representative
 rep_locations = {}
 rep_colors = {}
@@ -388,10 +208,10 @@ def bill_graph(data):
     return graph
 
 
-
+f = open("senate_bills_113_113.txt", "r")
+bill_list = json.load(f)
 bills = bill_graph(bill_list)
 
-# <codecell>
 
 #plot the edges
 nx.draw_networkx_edges(bills, rep_locations, alpha = .03)
