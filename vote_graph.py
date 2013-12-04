@@ -132,7 +132,7 @@ def closeness_centrality(votes):
         print "%s : %s" % (senator[0], senator[1])
     """
  
-
+"""
 centralities = [] 
 file_list = ["senate_votes_1990.txt", "senate_votes_1995.txt", "senate_votes_2000.txt", "senate_votes_2005.txt", "senate_votes_2010.txt", "senate_votes_2013.txt"] 
 #file_list = ["senate_votes_2005.txt", "senate_votes_2010.txt", "senate_votes_2013.txt"]
@@ -145,6 +145,7 @@ for file_name in file_list:
     centralities.append(closeness_centrality(votes))
 
 print centralities
+"""
 
 """
 file_list = ["senate_votes_1990.txt", "senate_votes_1995.txt", "senate_votes_2000.txt", "senate_votes_2005.txt", "senate_votes_2010.txt", "senate_votes_2013.txt"] 

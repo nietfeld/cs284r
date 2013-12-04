@@ -48,16 +48,21 @@ def remove_border(axes=None, top=False, right=False, left=True, bottom=True):
         ax.yaxis.tick_left()
     if right:
         ax.yaxis.tick_right()
-
+"""
+for votes: 
 centralities = [{'majority_size': 56, 'dems': 173.65830168949006, 'mean:': 171.60061115807699, 'gop': 169.03992960787392}, {'majority_size': 54, 'dems': 290.60582517917737, 'mean:': 295.696052187725, 'gop': 300.12643495442393}, {'majority_size': 55, 'dems': 167.45103589882862, 'mean:': 169.84287199009148, 'gop': 171.84331672096599}, {'majority_size': 55, 'dems': 186.5895926031653, 'mean:': 193.25792749709882, 'gop': 198.58012500551575}, {'majority_size': 61, 'dems': 112.0988790342671, 'mean:': 107.50918299217808, 'gop': 100.29504256306438}, {'majority_size': 56, 'dems': 87.574454603674425, 'mean:': 84.685387516493222, 'gop': 80.9201835700744}]
 
-
 years = np.array([1990, 1995, 2000, 2005, 2010, 2013])
+"""
+
+#for bills
+centralities = [{'mean:': 0.67142753098163699}, {'mean:': 0.73193554877063338}, {'mean:': 0.70426560150276452}, {'mean:': 0.72634939509018903}, {'mean:': 0.72374308129220366}, {'mean:': 0.72511626887232961}, {'mean:': 0.63833470916436119}, {'mean:': 0.70330964877545843}, {'mean:': 0.61582790957914335}]
+sessions = [105, 106, 107, 108, 109, 110, 111, 112, 113]
 
 plt.figure(figsize=(5,5))
-plt.plot(years, [x['dems'] for x in centralities], 'bo', years, [x['gop'] for x in centralities], 'ro', years, [x['mean:'] for x in centralities], 'k--')
+plt.plot(sessions, [x['mean:'] for x in centralities], 'k--') #[x['dems'] for x in centralities], 'bo', years, [x['gop'] for x in centralities], 'ro', years, [x['mean:'] for x in centralities], 'k--')
 ##plt.plot(years, [x['dems'] for x in centralities], 'r--')
-plt.axis([1989.5, 2013.5, 0, 350])
+plt.axis([105, 113, .5, .879])
 remove_border(left=False, bottom=False)
 plt.title('Senate Centrality Over Time')
 plt.show()
