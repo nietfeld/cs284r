@@ -110,66 +110,89 @@ def centralities_chart():
     print centralities
 
 def influence_charts_2013(): 
+    #open bills, make bill graph
     f = open("senate_bills/senate_bills_113.txt", "r")
     bill_list = json.load(f)
     bills = bill_graph(bill_list)
+    f.close()
 
-    pagerank_scores = nx.pagerank_numpy(bills)
-    sorted_pagerank = sorted(pagerank_scores.iteritems(), key=operator.itemgetter(1))
+    #influence model metrics
 
-    #calculate centrality 
-    sorted_page_keys = [x[0] for x in sorted_pagerank]
-    sorted_page_values = [x[1] for x in sorted_pagerank]
+
+    in_degree_dict = bills.in_degree() 
+    sorted_in_degree = sorted(in_degree_dict.iteritems(), key=operator.itemgetter(1))
+    # this is the order we'll base all of the graphs on
+    sorted_senators = [x[0] for x in sorted_in_degree]
+    senator_count = len(sorted_senators)
+
+    in_degree_values = [in_degree_dict[x] for x in sorted_senators]
+
+
+    pagerank_dict = nx.pagerank_numpy(bills)
+    pagerank_values = [pagerank_dict[x] for x in sorted_senators]
 
     hubs, authorities = nx.hits_numpy(bills)
-    sorted_hubs = [hubs[x] for x in sorted_page_keys]
-    sorted_authorities = [authorities[x] for x in sorted_page_keys]
+    hubs_values = [hubs[x] for x in sorted_senators]
+    authorities_values = [authorities[x] for x in sorted_senators]
 
-    in_degree = [(bills.in_degree([x])).values()[0] for x in sorted_page_keys]
-    out_degree = [(bills.out_degree([x])).values()[0] for x in sorted_page_keys]
-
-    #visualize centrality
-    fig = plt.figure(num=None, figsize=(18, 6), dpi=80, facecolor='w', edgecolor='k')
-    ax1 = fig.add_subplot(111)
-
-    plt.bar(range(len(sorted_page_keys)), sorted_page_values, align='center')
-    plt.xticks(range(len(sorted_page_keys)), sorted_page_keys, rotation=80, fontsize=9)
-    plt.xlabel("Senators by Pagerank Score")
-    plt.ylabel('Pagerank Score')
-    plt.show()
+    #get the colors we'll need for coloring 
+    f = open("party_dict.txt", "r")
+    party_dict = json.load(f)
+    color = [party_dict[x] for x in sorted_senators]
 
     #visualize in and out degree
 
     fig = plt.figure(num=None, figsize=(18, 6), dpi=80, facecolor='w', edgecolor='k')
     ax2 = fig.add_subplot(111)
 
-    plt.bar(range(len(sorted_page_keys)), in_degree, align='center')
-    plt.xticks(range(len(sorted_page_keys)), sorted_page_keys, rotation=90, fontsize=9)
+    plt.bar(range(senator_count), in_degree_values, align='center', color=color)
+    plt.xticks(range(senator_count), sorted_senators, rotation=90, fontsize=9)
     plt.xlabel("Senators by In-degree")
     plt.ylabel('In-degree')
     plt.show()
 
+    #visualize centrality
+    fig = plt.figure(num=None, figsize=(18, 6), dpi=80, facecolor='w', edgecolor='k')
+    ax1 = fig.add_subplot(111)
+
+    plt.bar(range(senator_count), pagerank_values, align='center', color=color)
+    plt.xticks(range(senator_count), sorted_senators, rotation=90, fontsize=9)
+    plt.xlabel("Senators by Pagerank Score")
+    plt.ylabel('Pagerank Score')
+    plt.show()
+
+
     fig = plt.figure(num=None, figsize=(18, 6), dpi=80, facecolor='w', edgecolor='k')
     ax3 = fig.add_subplot(111)
 
-    plt.bar(range(len(sorted_page_keys)), sorted_hubs, align='center')
-    plt.xticks(range(len(sorted_page_keys)), sorted_page_keys, rotation=90, fontsize=9)
+    plt.bar(range(senator_count), hubs_values, align='center', color=color)
+    plt.xticks(range(senator_count), sorted_senators, rotation=90, fontsize=9)
     plt.xlabel("Senators by HITS Hub Score")
     plt.ylabel('Hub Score')
     plt.show()
 
-
-    senator_scores = {u'Burr, Richard': 60, u'Johnson, Tim': 50, u'Johanns, Mike': 60, u'Begich, Mark': 71, u'Inhofe, James M.': 38, u'McCain, John': 25, u'Portman, Rob': 89, u'Rockefeller, John D., IV': 71, u'Landrieu, Mary L.': 101, u'Heinrich, Martin': 20, u'Pryor, Mark L.': 61, u'Brown, Sherrod': 81, u'Toomey, Pat': 50, u'Cardin, Benjamin L.': 101, u'Tester, Jon': 91, u'Wyden, Ron': 81, u'Klobuchar, Amy': 50, u'Lee, Mike': 65, u'Fischer, Deb': 0, u'Bennet, Michael F.': 20, u'Blunt, Roy': 71, u'Collins, Susan M.': 81, u'Schumer, Charles E.': 61, u'Harkin, Tom': 91, u'McCaskill, Claire': 91, u'Lautenberg, Frank R.': 91, u'Cruz, Ted': 57, u'Schatz, Brian': 19, u'Feinstein, Dianne': 90, u'Coats, Daniel': 48, u'Hagan, Kay': 49, u'King, Angus S. Jr.': 10, u'Murray, Patty': 50, u'Enzi, Michael B.': 49, u'Whitehouse, Sheldon': 40, u'Reed, Jack': 51, u'Ayotte, Kelly': 50, u'Levin, Carl': 61, u'Kaine, Tim': 19, u'Cowan, William M.': 0, u'Grassley, Chuck': 61, u'Baldwin, Tammy': 30, u'Chambliss, Saxby': 9, u'Gillibrand, Kirsten E.': 79, u'Sanders, Bernard': 60, u'Hoeven, John': 48, u'Leahy, Patrick J.': 71, u'Coons, Christopher A.': 38, u'Sessions, Jeff': 0, u'Thune, John': 61, u'Donnelly, Joe': 19, u'Moran, Jerry': 71, u'Hirono, Mazie K.': 40, u'Manchin, Joe, III': 40, u'Shelby, Richard C.': 90, u'Menendez, Robert': 71, u'Mikulski, Barbara A.': 81, u'Alexander, Lamar': 69, u'Scott, Tim': 0, u'Hatch, Orrin G.': 88, u'Cornyn, John': 60, u'Booker, Cory A.': 0, u'Blumenthal, Richard': 81, u'Markey, Edward J.': 0, u'Rubio, Marco': 68, u'Risch, James E.': 9, u'Cochran, Thad': 20, u'Franken, Al': 69, u'Coburn, Tom': 86, u'Kirk, Mark Steven': 69, u'Durbin, Richard': 69, u'Boozman, John': 48, u'Corker, Bob': 9, u'Barrasso, John': 59, u'Flake, Jeff': 25, u'Murphy, Christopher S.': 20, u'Stabenow, Debbie': 80, u'Johnson, Ron': 49, u'Carper, Thomas R.': 61, u'Udall, Tom': 40, u'Roberts, Pat': 67, u'Shaheen, Jeanne': 81, u'Vitter, David': 71, u'Paul, Rand': 49, u'Reid, Harry': 30, u'Heller, Dean': 40, u'Warren, Elizabeth': 10, u'McConnell, Mitch': 0, u'Isakson, Johnny': 30, u'Baucus, Max': 81, u'Casey, Robert P., Jr.': 90, u'Graham, Lindsey': 70, u'Heitkamp, Heidi': 36, u'Udall, Mark': 48, u'Murkowski, Lisa': 40, u'Cantwell, Maria': 61, u'Crapo, Mike': 0, u'Warner, Mark R.': 61, u'Boxer, Barbara': 70, u'Merkley, Jeff': 91, u'Nelson, Bill': 100, u'Wicker, Roger F.': 20, u'Chiesa, Jeff': 0}
-    sorted_senator_scores = [senator_scores[x] for x in sorted_page_keys]
-
     fig = plt.figure(num=None, figsize=(18, 6), dpi=80, facecolor='w', edgecolor='k')
     ax4 = fig.add_subplot(111)
 
-    plt.bar(range(len(sorted_page_keys)), sorted_senator_scores, align='center')
-    plt.xticks(range(len(sorted_page_keys)), sorted_page_keys, rotation=90, fontsize=9)
+    plt.bar(range(senator_count), authorities_values, align='center', color=color)
+    plt.xticks(range(senator_count), sorted_senators, rotation=90, fontsize=9)
+    plt.xlabel("Senators by HITS Authorities Score")
+    plt.ylabel('Authorities Score')
+    plt.show()
+
+
+    voter_model_scores = {u'Burr, Richard': 60, u'Johnson, Tim': 50, u'Johanns, Mike': 60, u'Begich, Mark': 71, u'Inhofe, James M.': 38, u'McCain, John': 25, u'Portman, Rob': 89, u'Rockefeller, John D., IV': 71, u'Landrieu, Mary L.': 101, u'Heinrich, Martin': 20, u'Pryor, Mark L.': 61, u'Brown, Sherrod': 81, u'Toomey, Pat': 50, u'Cardin, Benjamin L.': 101, u'Tester, Jon': 91, u'Wyden, Ron': 81, u'Klobuchar, Amy': 50, u'Lee, Mike': 65, u'Fischer, Deb': 0, u'Bennet, Michael F.': 20, u'Blunt, Roy': 71, u'Collins, Susan M.': 81, u'Schumer, Charles E.': 61, u'Harkin, Tom': 91, u'McCaskill, Claire': 91, u'Lautenberg, Frank R.': 91, u'Cruz, Ted': 57, u'Schatz, Brian': 19, u'Feinstein, Dianne': 90, u'Coats, Daniel': 48, u'Hagan, Kay': 49, u'King, Angus S. Jr.': 10, u'Murray, Patty': 50, u'Enzi, Michael B.': 49, u'Whitehouse, Sheldon': 40, u'Reed, Jack': 51, u'Ayotte, Kelly': 50, u'Levin, Carl': 61, u'Kaine, Tim': 19, u'Cowan, William M.': 0, u'Grassley, Chuck': 61, u'Baldwin, Tammy': 30, u'Chambliss, Saxby': 9, u'Gillibrand, Kirsten E.': 79, u'Sanders, Bernard': 60, u'Hoeven, John': 48, u'Leahy, Patrick J.': 71, u'Coons, Christopher A.': 38, u'Sessions, Jeff': 0, u'Thune, John': 61, u'Donnelly, Joe': 19, u'Moran, Jerry': 71, u'Hirono, Mazie K.': 40, u'Manchin, Joe, III': 40, u'Shelby, Richard C.': 90, u'Menendez, Robert': 71, u'Mikulski, Barbara A.': 81, u'Alexander, Lamar': 69, u'Scott, Tim': 0, u'Hatch, Orrin G.': 88, u'Cornyn, John': 60, u'Booker, Cory A.': 0, u'Blumenthal, Richard': 81, u'Markey, Edward J.': 0, u'Rubio, Marco': 68, u'Risch, James E.': 9, u'Cochran, Thad': 20, u'Franken, Al': 69, u'Coburn, Tom': 86, u'Kirk, Mark Steven': 69, u'Durbin, Richard': 69, u'Boozman, John': 48, u'Corker, Bob': 9, u'Barrasso, John': 59, u'Flake, Jeff': 25, u'Murphy, Christopher S.': 20, u'Stabenow, Debbie': 80, u'Johnson, Ron': 49, u'Carper, Thomas R.': 61, u'Udall, Tom': 40, u'Roberts, Pat': 67, u'Shaheen, Jeanne': 81, u'Vitter, David': 71, u'Paul, Rand': 49, u'Reid, Harry': 30, u'Heller, Dean': 40, u'Warren, Elizabeth': 10, u'McConnell, Mitch': 0, u'Isakson, Johnny': 30, u'Baucus, Max': 81, u'Casey, Robert P., Jr.': 90, u'Graham, Lindsey': 70, u'Heitkamp, Heidi': 36, u'Udall, Mark': 48, u'Murkowski, Lisa': 40, u'Cantwell, Maria': 61, u'Crapo, Mike': 0, u'Warner, Mark R.': 61, u'Boxer, Barbara': 70, u'Merkley, Jeff': 91, u'Nelson, Bill': 100, u'Wicker, Roger F.': 20, u'Chiesa, Jeff': 0}
+    voter_model_values = [voter_model_scores[x] for x in sorted_senators]
+
+    fig = plt.figure(num=None, figsize=(18, 6), dpi=80, facecolor='w', edgecolor='k')
+    ax5 = fig.add_subplot(111)
+
+    plt.bar(range(senator_count), voter_model_values, align='center', color=color)
+    plt.xticks(range(senator_count), sorted_senators, rotation=90, fontsize=9)
     plt.xlabel("Senators by Voter-Model Score")
     plt.ylabel('Voter-Model Score')
     plt.show()
+    
 
 # pretty prints a list of senators
 def senator_list():
@@ -183,4 +206,4 @@ def senator_list():
     with open("party_dict.txt", "w") as outfile:
         json.dump(party_dict, outfile,sort_keys=True, indent=4, separators=(',', ': '))
 
-
+influence_charts_2013()
