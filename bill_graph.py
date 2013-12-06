@@ -171,3 +171,16 @@ def influence_charts_2013():
     plt.ylabel('Voter-Model Score')
     plt.show()
 
+# pretty prints a list of senators
+def senator_list():
+    f = open("senate_bills/senate_bills_113.txt", "r")
+    bill_list = json.load(f)
+    bills = bill_graph(bill_list)
+    party_dict = {}
+    for senator in sorted(bills.nodes()):
+        party_dict[senator] = "b"
+    print party_dict
+    with open("party_dict.txt", "w") as outfile:
+        json.dump(party_dict, outfile,sort_keys=True, indent=4, separators=(',', ': '))
+
+
